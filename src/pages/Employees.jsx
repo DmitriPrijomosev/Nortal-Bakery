@@ -18,23 +18,25 @@ function Employees() {
         .then((json) => {
           setEmployees(json.data);
         });
+      
     } else {
-      console.log("massiiv pole tuhi");
-      setEmployees(localStorage.getItem("employees"));
+      setEmployees(JSON.parse(localStorage.getItem("employees")));
     }
   }, []);
 
   const addEmployee = () => {
     // TODO: Add validations
     // TODO: Add an employee to the table
+
+    let [firstName, lastName] = nameRef.current.value.split(' ');
+   
+
   };
 
-  function deleteEmployee(index) {
-    // TODO: Delete an employee from the table
+  const deleteEmployee = (index) => {
     employees.splice(index, 1);
+    localStorage.setItem("employees", JSON.stringify(employees));
     setEmployees(employees.slice());
-    console.log(employees);
-    localStorage.setItem("employees", employees);
   }
 
   return (
@@ -104,7 +106,7 @@ function Employees() {
                   placeholder="ID"
                   className="form-control"
                   ref={idRef}
-                  required
+                  // required
                 />
               </td>
               <td>
