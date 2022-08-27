@@ -9,35 +9,71 @@ function Employees() {
   const nameRef = useRef();
   const emailRef = useRef();
   const avatarRef = useRef();
+  const [idUnique, setIdUnique] = useState(true);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("employees") === null) {
-      console.log("LocalStorage massiiv tyhi");
+    if (localStorage.getItem("data") === null) {
       fetch(employeesURL)
         .then((res) => res.json())
         .then((json) => {
           setEmployees(json.data);
         });
-      
     } else {
-      setEmployees(JSON.parse(localStorage.getItem("employees")));
+      setEmployees(JSON.parse(localStorage.getItem("data")));
     }
   }, []);
 
   const addEmployee = () => {
-    // TODO: Add validations
-    // TODO: Add an employee to the table
+    if (idRef.current.value === "") {
+      setMessage("ID field empty or incorrect! Please use numbers only!");
+      return;
+    }
+    if (nameRef.current.value === "") {
+      setMessage("Field Name is empty");
+      return;
+    }
+    if (emailRef.current.value === "") {
+      setMessage("Email address is not entered");
+      return;
+    }
+    
+    if (avatarRef.current.value === "") {
+      setMessage("Image not attached!");
+      return;
+    }
+    setMessage("");
+    let [firstName, lastName] = nameRef.current.value.split(" ");
 
-    let [firstName, lastName] = nameRef.current.value.split(' ');
-   
-
+    employees.push({
+      id: Number(idRef.current.value),
+      email: emailRef.current.value,
+      first_name: firstName,
+      last_name: lastName,
+      avatar: avatarRef.current.value,
+    });
+    setEmployees(employees.slice());
+    localStorage.setItem("data", JSON.stringify(employees));
   };
 
   const deleteEmployee = (index) => {
     employees.splice(index, 1);
-    localStorage.setItem("employees", JSON.stringify(employees));
     setEmployees(employees.slice());
-  }
+    localStorage.setItem("data", JSON.stringify(employees));
+  };
+
+  const checkId = () => {
+    const index = employees.findIndex(
+      (element) => Number(element.id) === Number(idRef.current.value)
+    );
+    if (index === -1) {
+      setIdUnique(true);
+      setMessage("");
+    } else {
+      setIdUnique(false);
+      setMessage("ID is not unique!");
+    }
+  };
 
   return (
     <div>
@@ -56,8 +92,8 @@ function Employees() {
           </thead>
           <tbody>
             {employees.map((element, index) => (
-              <tr>
-                <td>{element.id}</td>
+              <tr key={index}>
+                <td key={index}>{element.id}</td>
                 <td>
                   {element.first_name} {element.last_name}
                 </td>
@@ -76,37 +112,15 @@ function Employees() {
                 </td>
               </tr>
             ))}
-            {/* <tr>
-              <td>123</td>
-              <td>Added name 1</td>
-              <td>email@email.com</td>
-              <td>avatar</td>
-              <td>
-                <Button type="button" variant="danger">
-                  Delete
-                </Button>
-              </td>
-            </tr> */}
-            {/* <tr>
-              <td>124</td>
-              <td>Added name 2</td>
-              <td>email2@email.com</td>
-              <td>avatar</td>
-              <td>
-                <Button type="button" variant="danger">
-                  Delete
-                </Button>
-              </td>
-            </tr> */}
 
             <tr className="input-row">
               <td>
                 <input
-                  type="text"
+                  type="number"
                   placeholder="ID"
                   className="form-control"
+                  onChange={checkId}
                   ref={idRef}
-                  // required
                 />
               </td>
               <td>
@@ -115,16 +129,14 @@ function Employees() {
                   placeholder="Name"
                   className="form-control"
                   ref={nameRef}
-                  required
                 />
               </td>
               <td>
                 <input
-                  type="text"
+                  type="email"
                   placeholder="Email"
                   className="form-control"
                   ref={emailRef}
-                  required
                 />
               </td>
               <td>
@@ -133,13 +145,13 @@ function Employees() {
                   placeholder="Avatar (url)"
                   className="form-control"
                   ref={avatarRef}
-                  required
                 />
               </td>
               <td>
                 <Button
                   type="submit"
                   variant="success"
+                  disabled={idUnique === false}
                   onClick={() => addEmployee()}
                 >
                   Add
@@ -148,6 +160,7 @@ function Employees() {
             </tr>
           </tbody>
         </Table>
+        <div>{message}</div>
       </div>
     </div>
   );
