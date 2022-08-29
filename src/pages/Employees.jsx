@@ -11,7 +11,7 @@ function Employees() {
   const avatarRef = useRef();
   const [idUnique, setIdUnique] = useState(true);
   const [message, setMessage] = useState("");
-
+  
   useEffect(() => {
     if (localStorage.getItem("data") === null) {
       fetch(employeesURL)
@@ -33,8 +33,22 @@ function Employees() {
       setMessage("Field Name is empty");
       return;
     }
+
+    let re = /^[a-zA-Z ]+$/;
+    if (!re.test(String(nameRef.current.value).toLowerCase())) {
+      setMessage("Please use the correct name")
+      return;
+    }
+
     if (emailRef.current.value === "") {
       setMessage("Email address is not entered");
+      return;
+    }
+    re =
+      /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    
+    if (!re.test(String(emailRef.current.value).toLowerCase())) {
+      setMessage("Email address is not valid!");
       return;
     }
     
@@ -42,7 +56,16 @@ function Employees() {
       setMessage("Image not attached!");
       return;
     }
+
+    re =
+      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+
+    if (!re.test(String(avatarRef.current.value).toLowerCase())) {
+      setMessage("Avatar URL is not valid!");
+      return;
+    }
     setMessage("");
+    
     let [firstName, lastName] = nameRef.current.value.split(" ");
 
     employees.push({
@@ -54,6 +77,11 @@ function Employees() {
     });
     setEmployees(employees.slice());
     localStorage.setItem("data", JSON.stringify(employees));
+
+    idRef.current.value = "";
+    emailRef.current.value = "";
+    avatarRef.current.value = "";
+    nameRef.current.value = "";
   };
 
   const deleteEmployee = (index) => {
@@ -121,6 +149,7 @@ function Employees() {
                   className="form-control"
                   onChange={checkId}
                   ref={idRef}
+                  
                 />
               </td>
               <td>
@@ -129,6 +158,7 @@ function Employees() {
                   placeholder="Name"
                   className="form-control"
                   ref={nameRef}
+
                 />
               </td>
               <td>
@@ -137,14 +167,16 @@ function Employees() {
                   placeholder="Email"
                   className="form-control"
                   ref={emailRef}
+
                 />
               </td>
               <td>
                 <input
-                  type="text"
+                  type="url"
                   placeholder="Avatar (url)"
                   className="form-control"
                   ref={avatarRef}
+
                 />
               </td>
               <td>
